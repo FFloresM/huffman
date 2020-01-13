@@ -1,8 +1,8 @@
 #include <bits/stdc++.h>
 #define MARKER -1 
 using namespace std;
-  
-/* A binary tree Node has key, pointer to left and right children */
+
+
 struct Node 
 { 
     int key;
@@ -30,7 +30,7 @@ int comp(Node * N1 ,Node*  N2){
       return 0;
     }
 }
-// This function stores a tree in a file pointed by fp 
+// esta funcion ayuda a serializar el arbol
 void serialize(Node *root, fstream &fp) 
 { 
     // If current node is NULL, store marker 
@@ -46,67 +46,77 @@ void serialize(Node *root, fstream &fp)
     serialize(root->right, fp); 
 } 
   
-// This function constructs a tree from a file pointed by 'fp' 
-/*void deSerialize(Node *&root, FILE *fp) 
+
+void deSerialize(Node * &root, fstream &fp , char &val) 
 { 
     // Read next item from file. If theere are no more items or next 
     // item is marker, then return 
-    int val; 
-    if ( !fscanf(fp, "%d ", &val) || val == MARKER) 
-       return; 
-  
-    // Else create node with this item and recur for children 
-    root = newNode(val); 
-    deSerialize(root->left, fp); 
-    deSerialize(root->right, fp); 
-} */
-  
-// A simple inorder traversal used for testing the constructed tree 
+    if( val== '2') return;
+    if ( !fp.get(val) || val == '-1'  || val== '2' ) 
+       return;
+    
+       cout<< val<<" ";
+     // Else create node with this item and recur for children 
+    root = newNode(0,val); 
+    deSerialize(root->left, fp , val); 
+    deSerialize(root->right, fp, val); 
 
-void inorder(Node *root , vector < int> &codigo , map <char,string> &val ) 
+} 
+  
+/*Recorre el arbol inorder recursivamente , generando el codigo para cada caracter */
+
+void inTree(Node *root , vector < int> &codigo , map <char,string> &val ) 
 { 
     if (root->left && root->right) 
     {   
-        codigo.push_back(48);
-        inorder(root->left ,codigo , val); 
+        codigo.push_back(48); // 0 si va por el hijo izquierdo
+        inTree(root->left ,codigo , val); 
         codigo.pop_back();
-        //printf("%d --- %c  ", root->key , root->caracter); 
-         codigo.push_back(49);
-        inorder(root->right ,codigo , val);
+
+         codigo.push_back(49);// 1 si va por el hijo derecho
+        inTree(root->right ,codigo , val);
         codigo.pop_back();
     } 
-    else{
-        cout << "codigo de " <<root->caracter<< "---" ;
-        string str(codigo.begin(), codigo.end());
-        cout << str;
+    else{// cuando llega a una hoja guarda el codigo en un mapa 
 
+        string str(codigo.begin(), codigo.end());
 
         val.insert(make_pair(root->caracter,str));
-        cout<<endl;
     }
 } 
 
+
+void inorder(Node *root) 
+{ 
+    if (root) 
+    { 
+        inorder(root->left); 
+        cout<< root->caracter<< " "; 
+        inorder(root->right); 
+    } 
+} 
+
+// cacula la frecuencia de cada caracter en el texto entregado, se utiliza un vector para guardar el caracter y otro para asociar la frecuencia de este 
 void  calcular_frecuencia (char *text , vector <char> & caracter , vector <int> & frecuencia  ){
     
     int tam_texto = strlen(text);
 
     
     for(int i = 0; i < tam_texto; i++){
-         int pos = find ( caracter.begin(), caracter.end(),*text)- caracter.begin();     
-         
-        if(pos >= caracter.size()){
+
+         int pos = find ( caracter.begin(), caracter.end(),*text)- caracter.begin();  // busca si el caracter está en el vector de caracteres
+
+        if(pos >= caracter.size()){// si no está es agregado y se contabiliza una aparición
             caracter.push_back(*text);
             frecuencia.push_back(1);
         }else{
             frecuencia[pos]++;
         }
         *text++;
-        
         }
 
-  
 }
-
+// une 2 nodos y crea un padre el cual es rectornado 
 Node * unir_nodos(Node * N1 , Node * N2){
     Node * padre = newNode(N1->key + N2->key ,48);
 
@@ -116,47 +126,53 @@ Node * unir_nodos(Node * N1 , Node * N2){
     return padre;
 }
 
+/* El proceso de construcción del árbol comienza formando un nodo intermedio que agrupa a los dos nodos hoja que tienen menor peso
+(frecuencia de aparición). El nuevo nodo intermedio tendrá como nodos hijos a estos dos nodos hoja y su campo peso será igual a la suma de los pesos de los nodos hijos.
+Los dos nodos hijos se eliminan de la lista de nodos, sustituyéndolos por el nuevo nodo intermedio. El proceso se repite hasta que sólo quede un nodo en la lista. 
+Este último nodo se convierte en el nodo raíz del árbol de Huffman */
 
 Node *  huffman (vector <char> & caracteres ,vector<int> & t_frecuencias){
+  
     vector<Node*> lista_nodos;
     Node * head;
-    for(int  i = 0 ; i < caracteres.size(); i++ ){
+
+    // son ingresados todos los nodos que contienen cada caracter y su frecuencia a la lista de nodos 
+    for(int  i = 0 ; i < caracteres.size(); i++ ){ 
+
        lista_nodos.push_back(newNode(t_frecuencias[i], caracteres[i]));
     }
-
+    // los nodos son ordenados en orden creciente 
     sort(lista_nodos.begin() , lista_nodos.end(), comp);
 
-     for(int  i = 0 ; i < caracteres.size(); i++ ){
-
-       cout<< lista_nodos[i]->caracter << " -- " << lista_nodos[i]->key <<endl;
-        }
     
+    // se unen los nodos con menor frecuencia y se borran de la lista , es ingresado a la lista el nodo intermedio 
     while(lista_nodos.size()>1){
         head = unir_nodos(lista_nodos[0] , lista_nodos[1]);
         lista_nodos.erase (lista_nodos.begin(), lista_nodos.begin()+2);
         lista_nodos.push_back(head);
         
         sort(lista_nodos.begin() , lista_nodos.end(), comp);
-
+    
         for(int  i = 0 ; i < lista_nodos.size(); i++ ){
 
        cout<< lista_nodos[i]->caracter << " -- " << lista_nodos[i]->key <<endl;
     }
         }
     cout<< head->key<<endl; 
-    return head;
+
+    return head;// es retornado la raiz del arbol construido 
 }
-
-
+/* recibe de entrada la raiz del arbol de huffman y retorna un mapa que contiene cada caracter asociado con  su respectivo codigo*/
 map<char , string> codificacion(Node * Arbol ){
     Node *aux=Arbol;
     map <char , string> tabla_cod;
     vector<int> codifica;
-    inorder (Arbol, codifica ,tabla_cod);
+    inTree (Arbol, codifica ,tabla_cod);
     return tabla_cod;
 }
-void comprimir (map<char,string> t_Codif, char* text ,fstream &fp){
 
+/* utiliza la tabla de codigos para comprimir el texto , el texto se lee carcter a caracter  y es agregado al archivo referenciado */
+void comprimir (map<char,string> t_Codif, char* text ,fstream &fp){
    int tam_texto = strlen(text);
    map<char, string>::iterator p;
    char * m;
@@ -165,9 +181,7 @@ void comprimir (map<char,string> t_Codif, char* text ,fstream &fp){
         p = t_Codif.find(*text);
         fp << p->second;
         *text++;
-        
         }
-
 
 
 }
@@ -217,14 +231,27 @@ int main() {
    frecuencia.push_back(15);
    frecuencia.push_back(15);*/
     arbol_H=  huffman(caracter, frecuencia);
+    inorder(arbol_H);
+
    serialize( arbol_H, compresion);
    compresion<< 2 <<endl;
 
    comprimir(codificacion(arbol_H), text , compresion);
+    compresion.close();
    
-   compresion.close();
+   compresion.open("textocom.txt" ,ios::in);
 
+   Node *root1 = NULL;
+   char val ;
+   deSerialize(root1 , compresion ,val);
+   cout <<"inorder"<< endl;
+   
+   inorder(root1);
 
+   
+   
+
+    compresion.close();
 
 
   archivo.close();
