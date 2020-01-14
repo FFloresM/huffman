@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#define MARKER -1 
+#define MARKER '$' 
 using namespace std;
 
 
@@ -36,12 +36,12 @@ void serialize(Node *root, fstream &fp)
     // If current node is NULL, store marker 
     if (root == NULL) 
     { 
-        fp<< MARKER<<" "; 
+        fp<< MARKER; 
         return; 
     } 
   
     // Else, store current node and recur for its children 
-    fp<<root->caracter<<" "; 
+    fp<<root->caracter; 
     serialize(root->left, fp); 
     serialize(root->right, fp); 
 } 
@@ -52,12 +52,14 @@ void deSerialize(Node * &root, fstream &fp , char &val)
     // Read next item from file. If theere are no more items or next 
     // item is marker, then return 
     if( val== '2') return;
-    if ( !fp.get(val) || val == '-1'  || val== '2' ) 
-       return;
+    if ( !fp.get(val) || val == '$'  || val== '2' ) {
+        cout<< val<< "  ";
+       return;}
     
        cout<< val<<" ";
      // Else create node with this item and recur for children 
     root = newNode(0,val); 
+
     deSerialize(root->left, fp , val); 
     deSerialize(root->right, fp, val); 
 
@@ -82,6 +84,7 @@ void inTree(Node *root , vector < int> &codigo , map <char,string> &val )
         string str(codigo.begin(), codigo.end());
 
         val.insert(make_pair(root->caracter,str));
+        cout << root->caracter << "-----"<< str<<endl;
     }
 } 
 
@@ -97,22 +100,28 @@ void inorder(Node *root)
 } 
 
 // cacula la frecuencia de cada caracter en el texto entregado, se utiliza un vector para guardar el caracter y otro para asociar la frecuencia de este 
-void  calcular_frecuencia (char *text , vector <char> & caracter , vector <int> & frecuencia  ){
+void  calcular_frecuencia (vector <char> & caracter , vector <int> & frecuencia , fstream &archivo ){
     
-    int tam_texto = strlen(text);
+    //int tam_texto = strlen(text);
+    char text;
+    archivo.get(text);
+    while(!archivo.eof()){
+        //cout<< text;
+        if( text == '\n'){
+                //cout<< "salto"<<endl;
+               text = '~';
+            }
 
-    
-    for(int i = 0; i < tam_texto; i++){
-
-         int pos = find ( caracter.begin(), caracter.end(),*text)- caracter.begin();  // busca si el caracter está en el vector de caracteres
+         int pos = find ( caracter.begin(), caracter.end(), text)- caracter.begin();  // busca si el caracter está en el vector de caracteres
 
         if(pos >= caracter.size()){// si no está es agregado y se contabiliza una aparición
-            caracter.push_back(*text);
-            frecuencia.push_back(1);
-        }else{
-            frecuencia[pos]++;
-        }
-        *text++;
+           caracter.push_back(text);
+           frecuencia.push_back(1);
+
+        }else frecuencia[pos]++;
+        
+        
+         archivo.get(text);
         }
 
 }
@@ -170,18 +179,43 @@ map<char , string> codificacion(Node * Arbol ){
     inTree (Arbol, codifica ,tabla_cod);
     return tabla_cod;
 }
+void decodificacion (Node* Arbol , fstream & fp , fstream &fdc ){
+    char cod;
+    Node *aux = Arbol;
+    fp.get(cod);
 
+    while(!fp.eof()){
+        
+        if( aux ->caracter !='0'){
+            if(aux ->caracter =='~'){
+                fdc<<'\n';
+            }else{
+            fdc<<aux->caracter;
+            //cout<< aux->caracter;
+            }
+            aux= Arbol;
+            }
+        if(cod== '1') aux= aux->right;
+        if(cod== '0' )aux= aux->left;
+        fp.get(cod);
+    }
+
+}
 /* utiliza la tabla de codigos para comprimir el texto , el texto se lee carcter a caracter  y es agregado al archivo referenciado */
-void comprimir (map<char,string> t_Codif, char* text ,fstream &fp){
-   int tam_texto = strlen(text);
+void comprimir (map<char,string> t_Codif, fstream &archivo ,fstream &fp){
    map<char, string>::iterator p;
-   char * m;
-    for(int i = 0; i < tam_texto; i++){
-       
-        p = t_Codif.find(*text);
+   char m;
+   
+    while(!archivo.eof()){
+        archivo.get(m);
+        if(m=='\n'){
+            p = t_Codif.find('~');
+        }else   p = t_Codif.find(m);
+        
         fp << p->second;
-        *text++;
+
         }
+    
 
 
 }
@@ -191,11 +225,10 @@ void comprimir (map<char,string> t_Codif, char* text ,fstream &fp){
 int main() { 
 
     fstream archivo;
-    fstream compresion;
+    fstream compresion , descomp;
     
     string texto , auxtext;
-    char *text;
-    text = new char [5000000];
+
     vector <char> caracter;
     vector <int> frecuencia , cod;
     map <char , string> t_codigos;
@@ -205,55 +238,50 @@ int main() {
      if(archivo.fail()){
        cout<<"error al abrir el archivo";
        exit(0);
-       }    
-   while( !archivo.eof()){
+       } 
+
+  /* while( !archivo.eof()){
        getline(archivo,auxtext);
         strcat(text, auxtext.c_str());
        if(strlen(text)>1000) break;
-   }
-   FILE *fp = fopen("tree.txt", "w"); 
-    if (fp == NULL) 
-    { 
-        puts("Could not open file"); 
-        return 0; 
-    } 
-    compresion.open("textocom.txt" ,ios::out);
+   }*/
 
-    calcular_frecuencia(text ,caracter , frecuencia);
-   /*caracter.push_back('A');
-   caracter.push_back('B');
-   caracter.push_back('C');
-   caracter.push_back('D');
-   caracter.push_back('E');
-   frecuencia.push_back(25);
-   frecuencia.push_back(25);
-   frecuencia.push_back(20);
-   frecuencia.push_back(15);
-   frecuencia.push_back(15);*/
+    compresion.open("textocomprimido.txt" ,ios::out);
+    descomp.open("textodescomprimido.txt", ios ::out);
+
+    calcular_frecuencia(caracter , frecuencia , archivo);
+    archivo.close();
+
+    archivo.open("dna.txt",ios::in);
+
     arbol_H=  huffman(caracter, frecuencia);
+    cout << "arbolgenerado"<<endl;
     inorder(arbol_H);
 
    serialize( arbol_H, compresion);
-   compresion<< 2 <<endl;
+   compresion<<2<<endl;
 
-   comprimir(codificacion(arbol_H), text , compresion);
+   comprimir(codificacion(arbol_H), archivo, compresion);
     compresion.close();
    
-   compresion.open("textocom.txt" ,ios::in);
-
+   compresion.open("textocomprimido.txt" ,ios::in);
+   cout<<endl;
    Node *root1 = NULL;
    char val ;
+
    deSerialize(root1 , compresion ,val);
-   cout <<"inorder"<< endl;
-   
+
+    compresion.get(val);
+    compresion.get(val);
+
    inorder(root1);
+   cout << endl; 
+
+   decodificacion(root1, compresion , descomp);
 
    
-   
-
-    compresion.close();
-
-
+   descomp.close();
+compresion.close();
   archivo.close();
   
   return 0; 
