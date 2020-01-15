@@ -183,11 +183,12 @@ int main(){
     map <char , string> t_codigos;
     Node * arbol_H;
 
-    string texto_comprimir;
+    string texto_comprimir, texto_comprimido;
     cin >> texto_comprimir;
+    cin >> texto_comprimido;
     cout<<texto_comprimir<<": a comprimir"<<endl;
 
-    string texto_comprimido = "comprimido_" + texto_comprimir;
+    // string texto_comprimido = "comprimido_" + texto_comprimir;
 
     archivo.open(texto_comprimir,ios::in);
      if(archivo.fail()){

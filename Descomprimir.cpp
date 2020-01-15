@@ -74,10 +74,11 @@ void decodificacion (Node* Arbol , fstream & fp , fstream &fdc ){
 
 int main(){
     fstream compresion , descomp;
-    string texto_comprimido;
+    string texto_comprimido, texto_descomprimido;
     cin >> texto_comprimido;
+    cin >> texto_descomprimido;
 
-    string texto_descomprimido = "descomprimido_" + texto_comprimido;
+    // string texto_descomprimido = "descomprimido_" + texto_comprimido;
 
     descomp.open(texto_descomprimido, ios ::out);
     compresion.open(texto_comprimido ,ios::in);
