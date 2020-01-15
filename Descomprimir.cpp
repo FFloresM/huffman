@@ -72,11 +72,14 @@ void decodificacion (Node* Arbol , fstream & fp , fstream &fdc ){
 }
 
 
-int main(){
+int main(int argc, char const *argv[]){
+
     fstream compresion , descomp;
-    string texto_comprimido, texto_descomprimido;
-    cin >> texto_comprimido;
-    cin >> texto_descomprimido;
+
+    string texto_comprimido = argv[1];
+    string texto_descomprimido = argv[2];
+ //   cin >> texto_comprimido;
+ //   cin >> texto_descomprimido;
 
     // string texto_descomprimido = "descomprimido_" + texto_comprimido;
 
