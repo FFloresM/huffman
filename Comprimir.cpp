@@ -160,22 +160,54 @@ map<char , string> codificacion(Node * Arbol ){
 
 /* utiliza la tabla de codigos para comprimir el texto , el texto se lee carcter a caracter  y es agregado al archivo referenciado */
 void comprimir (map<char,string> t_Codif, fstream &archivo ,fstream &fp){
-   map<char, string>::iterator p;
+   map<char, string>::iterator cod;
+   string :: iterator p;
    char m;
-   
-    while(!archivo.eof()){
+    unsigned char d=0;
+    int x;
+    char nbit=0;
+    //char *p;
+
+    while (!archivo.eof()){
+
+            archivo.get(m);
+
+            if(m=='\n'){
+
+            cod = t_Codif.find('~');
+
+            }else   cod = t_Codif.find(m);
+            p = cod->second.begin();
+
+         while (p != cod->second.end()){
+            
+            if (nbit==8){
+                nbit=0;
+                fp<<d;
+                d=0;
+            } else
+            {
+                if (*p==1){
+                    d|=(1<<nbit);
+                }
+                ++nbit;
+                ++p;
+            }
+        }
+    }
+    /*while(!archivo.eof()){
         archivo.get(m);
         if(m=='\n'){
             p = t_Codif.find('~');
         }else   p = t_Codif.find(m);
         
-        fp << p->second;
+        fp.put(p->second);
 
-        }
-}
+        */}
+        
 
-int main(int argc, char const *argv[])
-{
+
+int main(int argc, const char* argv[]){
 
     fstream archivo;
     fstream compresion;
@@ -186,8 +218,8 @@ int main(int argc, char const *argv[])
 
     string texto_comprimir = argv[1];
     string texto_comprimido = argv[2];
- //   cin >> texto_comprimir;
- //   cin >> texto_comprimido;
+  //  cin >> texto_comprimir;
+  //  cin >> texto_comprimido;
     cout<<texto_comprimir<<": a comprimir"<<endl;
 
     // string texto_comprimido = "comprimido_" + texto_comprimir;
@@ -198,7 +230,7 @@ int main(int argc, char const *argv[])
        exit(0);
        } 
 
-    compresion.open(texto_comprimido ,ios::out);
+    compresion.open(texto_comprimido ,ios::out | ios :: binary);
 
     calcular_frecuencia(caracter , frecuencia , archivo);
     
