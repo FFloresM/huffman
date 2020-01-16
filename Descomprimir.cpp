@@ -99,12 +99,15 @@ void decodificacion (Node* Arbol , fstream & fp , fstream &fdc ){
 }
 
 
-int main(){
+int main(int argc, char const *argv[]){
     fstream compresion , descomp;
-    string texto_comprimido, texto_descomprimido;
-    cin >> texto_comprimido;
-    cin >> texto_descomprimido;
+    if (argc != 3){
+        cout << "debe especificar archivo a descomprimir y nombre archivo descomprimido\n";
+        return 1;
+    }
 
+    string texto_comprimido = argv[1];
+    string texto_descomprimido = argv[2];
    
 
     descomp.open(texto_descomprimido, ios ::out );
@@ -127,4 +130,6 @@ int main(){
     descomp.close();
     compresion.close();
     cout<<"Texto descomprimido" <<endl;
+
+    return 0;
 }

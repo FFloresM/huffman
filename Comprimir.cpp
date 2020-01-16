@@ -209,8 +209,7 @@ void comprimir (map<char,string> t_Codif, fstream &archivo ,fstream &fp){
         */}
         
 
-
-int main(){
+int main(int argc, char const *argv[]){
 
     fstream archivo;
     fstream compresion;
@@ -219,9 +218,14 @@ int main(){
     map <char , string> t_codigos;
     Node * arbol_H;
 
-    string texto_comprimir, texto_comprimido;
-    cin >> texto_comprimir;
-    cin >> texto_comprimido;
+    if (argc != 3){
+        cout << "debe especificar archivo a comprimir y nombre archivo comprimido\n";
+        return 1;
+    }
+
+    string texto_comprimir = argv[1];
+    string texto_comprimido = argv[2];
+
     cout<<texto_comprimir<<": a comprimir"<<endl;
 
     // string texto_comprimido = "comprimido_" + texto_comprimir;
