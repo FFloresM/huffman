@@ -47,60 +47,83 @@ void inorder(Node *root)
         inorder(root->right); 
     } 
 } 
+// recibe como entreada el arbol de huffman , el archivo a descomprimir y el archivo donde queda el archivo descomprimido
 
 void decodificacion (Node* Arbol , fstream & fp , fstream &fdc ){
-    char cod;
-    Node *aux = Arbol;
-    fp.get(cod);
-
+    Node* Q= Arbol;
+    char *p;
+    int j,k,n,m;
+    unsigned char x,nbit;
+    j=0;
+    x=fp.get();
+    nbit=0;
+    n=0;
     while(!fp.eof()){
-        
-        if( aux ->caracter !='0'){
-            if(aux ->caracter =='~'){
+
+        if (Q->caracter != '0'){
+            if(Q->caracter =='~'){
                 fdc<<'\n';
             }else{
-            fdc<<aux->caracter;
-            //cout<< aux->caracter;
+            fdc<<Q->caracter;
+           
             }
-            aux= Arbol;
+            Q=Arbol;
+        } else{
+
+            if (nbit==8){
+            x=fp.get();
+            
+            nbit=0;
+            } else {
+               
+            if (x&(1<<nbit)){ 
+                Q=Q->right;
+               
             }
-        if(cod== '1') aux= aux->right;
-        if(cod== '0' )aux= aux->left;
-        fp.get(cod);
+            else
+            {
+                Q=Q->left;
+                
+            }
+            nbit++;
+           }
     }
+
+
+
+    }
+    
+        
+
 
 }
 
 
-int main(int argc, char const *argv[]){
-
+int main(){
     fstream compresion , descomp;
+    string texto_comprimido, texto_descomprimido;
+    cin >> texto_comprimido;
+    cin >> texto_descomprimido;
 
-    string texto_comprimido = argv[1];
-    string texto_descomprimido = argv[2];
- //   cin >> texto_comprimido;
- //   cin >> texto_descomprimido;
+   
 
-    // string texto_descomprimido = "descomprimido_" + texto_comprimido;
-
-    descomp.open(texto_descomprimido, ios ::out);
-    compresion.open(texto_comprimido ,ios::in);
+    descomp.open(texto_descomprimido, ios ::out );
+    compresion.open(texto_comprimido ,ios::in | ios :: binary);
 
     Node *root1 = NULL;
     char val ;
-    //cout << endl;
+    
     deSerialize(root1 , compresion ,val);
-    //cout << endl;
+  
     compresion.get(val);
-    //compresion.get(val);
-    //cout <<" 1"<< endl;
-    // inorder(root1);
-    //cout << endl;
-    //cout << endl; 
+    compresion.get(val);
+    
+     
+ 
+    //inorder(root1);
 
     decodificacion(root1, compresion , descomp);
-    //cout << endl;
-    //cout << endl;
+  
     descomp.close();
     compresion.close();
     cout<<"Texto descomprimido" <<endl;

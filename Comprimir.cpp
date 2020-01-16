@@ -62,7 +62,9 @@ void inTree(Node *root , vector < int> &codigo , map <char,string> &val )
         string str(codigo.begin(), codigo.end());
 
         val.insert(make_pair(root->caracter,str));
-        // cout << root->caracter << "-----"<< str<<endl;
+        //cout << root->caracter << "-----"<< str <<endl;
+
+        
     }
 } 
 
@@ -141,8 +143,8 @@ Node *  huffman (vector <char> & caracteres ,vector<int> & t_frecuencias){
         sort(lista_nodos.begin() , lista_nodos.end(), comp);
     
         for(int  i = 0 ; i < lista_nodos.size(); i++ ){
-
-    //    cout<< lista_nodos[i]->caracter << " -- " << lista_nodos[i]->key <<endl;
+            
+         //cout<< lista_nodos[i]->caracter << " -- " << lista_nodos[i]->key <<endl;
     }
         }
     // cout<< head->key<<endl; 
@@ -161,8 +163,8 @@ map<char , string> codificacion(Node * Arbol ){
 /* utiliza la tabla de codigos para comprimir el texto , el texto se lee carcter a caracter  y es agregado al archivo referenciado */
 void comprimir (map<char,string> t_Codif, fstream &archivo ,fstream &fp){
    map<char, string>::iterator cod;
-   string :: iterator p;
-   char m;
+    string :: iterator p;
+    char m;
     unsigned char d=0;
     int x;
     char nbit=0;
@@ -180,18 +182,19 @@ void comprimir (map<char,string> t_Codif, fstream &archivo ,fstream &fp){
             p = cod->second.begin();
 
          while (p != cod->second.end()){
-            
+
+
             if (nbit==8){
                 nbit=0;
                 fp<<d;
                 d=0;
-            } else
-            {
-                if (*p==1){
+            } else{
+                if (*p=='1'){
+                    
                     d|=(1<<nbit);
                 }
-                ++nbit;
-                ++p;
+                nbit++;
+                p++;
             }
         }
     }
@@ -207,7 +210,7 @@ void comprimir (map<char,string> t_Codif, fstream &archivo ,fstream &fp){
         
 
 
-int main(int argc, const char* argv[]){
+int main(){
 
     fstream archivo;
     fstream compresion;
@@ -216,10 +219,9 @@ int main(int argc, const char* argv[]){
     map <char , string> t_codigos;
     Node * arbol_H;
 
-    string texto_comprimir = argv[1];
-    string texto_comprimido = argv[2];
-  //  cin >> texto_comprimir;
-  //  cin >> texto_comprimido;
+    string texto_comprimir, texto_comprimido;
+    cin >> texto_comprimir;
+    cin >> texto_comprimido;
     cout<<texto_comprimir<<": a comprimir"<<endl;
 
     // string texto_comprimido = "comprimido_" + texto_comprimir;
